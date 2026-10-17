@@ -46,6 +46,11 @@ pip install -r requirements.txt
 
 Paste a sample of your app's CLI or Streamlit output here so a reader can see what a generated plan looks like:
 
+Today's Schedule
+[ ] 2026-10-17 08:00  Fluffy   Feed Fluffy (daily)
+[ ] 2026-10-17 09:00  Spot     Walk Spot (once)
+[ ] 2026-10-17 10:00  Fluffy   Vet appointment for Fluffy (weekly)
+
 ```
 # e.g.:
 # Daily plan for Biscuit (Golden Retriever):
@@ -53,6 +58,7 @@ Paste a sample of your app's CLI or Streamlit output here so a reader can see wh
 #   09:00 — Feeding (10 min) [priority: high]
 #   ...
 ```
+
 
 ## 🧪 Testing PawPal+
 
