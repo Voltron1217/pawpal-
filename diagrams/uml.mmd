@@ -1,39 +1,51 @@
 classDiagram
     class Owner {
-        +String name
         +int ownerId
+        +String name
         +String phone
-        +addOwner() void
+        +List~Pet~ pets
+        +addPet(pet) void
     }
 
     class Pet {
+        +int petId
         +String name
         +int age
         +String breed
-        +int petId
-        +addPet() void
+        +float weight
+        +List~Scheduling~ appointments
+        +List~Task~ tasks
+        +scheduleAppointment(appointment) void
+        +addTask(task) void
+        +isAvailable(on) bool
     }
 
     class Scheduling {
-        +String appointmentDate
         +int appointmentId
-        +int petId
-        +int payments
-        +String task
-        +scheduleAppointment() void
+        +date appointmentDate
+        +float payments
+        +bool urgent
+        +List~Task~ tasks
+        +addTask(task) void
     }
 
-    class Todo {
-        +int petId
-        +String task
-        +int appointmentId
-        +int weightOfDog
+    class Task {
+        +int taskId
+        +String description
+        +bool urgent
         +String notesAskQuestionToOwner
-        +dict medicine
-        +addTask() void
+        +List~Medicine~ medicines
+        +addMedicine(medicine) void
+    }
+
+    class Medicine {
+        +String name
+        +int dosePerDay
+        +float cost
     }
 
     Owner "1" --> "1..*" Pet : owns
     Pet "1" --> "0..*" Scheduling : has appointments
-    Pet "1" --> "0..*" Todo : has tasks
-    Scheduling "1" --> "0..*" Todo : includes
+    Pet "1" --> "0..*" Task : has tasks
+    Scheduling "1" --> "0..*" Task : includes
+    Task "1" --> "0..*" Medicine : prescribes

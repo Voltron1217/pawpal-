@@ -78,14 +78,20 @@ Sample test output:
 
 ## 📐 Smarter Scheduling
 
-> Fill in once you've implemented scheduling logic.
+All of the scheduling logic lives in `Scheduler` and `Task` in [pawpal_system.py](pawpal_system.py). Run `python main.py` to see each feature in the terminal.
 
 | Feature | Method(s) | Notes |
 |---------|-----------|-------|
-| Task sorting | | e.g., by priority, duration |
-| Filtering | | e.g., skip tasks if time runs out |
-| Conflict handling | | e.g., overlapping time slots |
-| Recurring tasks | | e.g., daily vs. weekly |
+| Task sorting | `Scheduler.sorted_by_time()` | Orders tasks from every pet by their `datetime` using `sorted(..., key=lambda t: t.time)`. Accepts an optional list, so it can sort filtered results. |
+| Daily view | `Scheduler.tasks_on(day)` | Tasks due on one calendar day, in time order. |
+| Filtering | `Scheduler.filter_tasks(pet_name, completed)` | Filter by pet name, completion status, or both. Passing `None` skips that filter. The Streamlit app exposes it as Pet and Status dropdowns. |
+| Recurring tasks | `Task.next_occurrence(after)`, `Scheduler.complete_task(task, now)` | Completing a `daily` or `weekly` task adds a fresh copy to the same pet. The new due date is the completion day plus one `timedelta` step, keeping the original time of day, and is never earlier than the old due time plus one step. `once` tasks do not recur. |
+| Conflict detection | `Scheduler.find_conflicts()` | Finds pending tasks whose time ranges overlap, using `Task.end` (start + `duration_minutes`, default 30). Works for the same pet or different pets, and ignores completed tasks. Back-to-back tasks are not conflicts. |
+| Conflict warnings | `Scheduler.conflict_warnings()`, `Scheduler.warnings_for(task)` | Lightweight: returns warning strings instead of raising, and an empty list means no conflicts. `conflict_warnings()` covers the whole schedule. `warnings_for()` checks a task before it is added. |
+
+### Tradeoff
+
+Conflicts are reported but never resolved. The scheduler does not move, reject, or reprioritize tasks, because the owner knows context it cannot, and a warning can never crash the app or lose data.
 
 ## 📸 Demo Walkthrough
 

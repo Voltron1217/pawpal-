@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field, replace
 from datetime import datetime, timedelta
+from uuid import uuid4
 
 FREQUENCIES = {"once": None, "daily": timedelta(days=1), "weekly": timedelta(weeks=1)}
 
@@ -13,22 +14,42 @@ class Task:
     frequency: str = "once"
     completed: bool = False
     pet_name: str = ""
+    duration_minutes: int = 30
+    id: str = field(default_factory=lambda: uuid4().hex, init=False, repr=False)
 
     def __post_init__(self) -> None:
         """Reject frequencies other than once, daily, or weekly."""
         if self.frequency not in FREQUENCIES:
             raise ValueError(f"frequency must be one of {list(FREQUENCIES)}")
+        if self.duration_minutes <= 0:
+            raise ValueError("duration_minutes must be positive")
+
+    @property
+    def end(self) -> datetime:
+        """When this task finishes."""
+        return self.time + timedelta(minutes=self.duration_minutes)
 
     def mark_complete(self) -> None:
         """Mark this task as completed."""
         self.completed = True
 
-    def next_occurrence(self) -> Task | None:
-        """A fresh, incomplete copy of a recurring task, or None for one-off tasks."""
+    def next_occurrence(self, after: datetime | None = None) -> Task | None:
+        """A fresh, incomplete copy of a recurring task, or None for one-off tasks.
+
+        The new due date is the completion day (`after`, default: this task's own
+        due time) plus one step, keeping the original time of day. It is never
+        earlier than this task's due time plus one step, so completing a task
+        early doesn't duplicate an upcoming occurrence.
+        """
         step = FREQUENCIES[self.frequency]
         if step is None:
             return None
-        return replace(self, time=self.time + step, completed=False)
+        base = after if after is not None else self.time
+        nxt = max(
+            datetime.combine(base.date() + step, self.time.time()),
+            self.time + step,
+        )
+        return replace(self, time=nxt, completed=False)
 
 
 @dataclass
@@ -105,19 +126,41 @@ class Scheduler:
         return self.sorted_by_time(due)
 
     def find_conflicts(self) -> list[tuple[Task, Task]]:
-        """Pairs of pending tasks scheduled for the same time."""
+        """Pairs of pending tasks whose time ranges overlap."""
         pending = self.sorted_by_time(self.filter_tasks(completed=False))
+        conflicts = []
+        for i, a in enumerate(pending):
+            for b in pending[i + 1 :]:
+                if b.time >= a.end:  # sorted, so nothing later can overlap a
+                    break
+                conflicts.append((a, b))
+        return conflicts
+
+    @staticmethod
+    def _warning(a: Task, b: Task) -> str:
+        """Human-readable description of two clashing tasks."""
+        pa, pb = a.pet_name or "unassigned", b.pet_name or "unassigned"
+        who = f"{pa}'s" if pa == pb else f"{pa}'s and {pb}'s"
+        kind = "same pet" if pa == pb else "different pets"
+        when = f"{a.time:%a %H:%M}" if a.time == b.time else f"{a.time:%a %H:%M}-{a.end:%H:%M} / {b.time:%H:%M}-{b.end:%H:%M}"
+        return f"WARNING: {who} tasks '{a.description}' and '{b.description}' clash at {when} ({kind})"
+
+    def conflict_warnings(self) -> list[str]:
+        """One warning message per clashing pair; an empty list means no conflicts."""
+        return [self._warning(a, b) for a, b in self.find_conflicts()]
+
+    def warnings_for(self, task: Task) -> list[str]:
+        """Warnings a task would cause if added now. Never raises, never modifies anything."""
         return [
-            (a, b)
-            for i, a in enumerate(pending)
-            for b in pending[i + 1 :]
-            if a.time == b.time
+            self._warning(task, other)
+            for other in self.filter_tasks(completed=False)
+            if other is not task and task.time < other.end and other.time < task.end
         ]
 
-    def complete_task(self, task: Task) -> Task | None:
+    def complete_task(self, task: Task, now: datetime | None = None) -> Task | None:
         """Mark a task done; if it recurs, add the next occurrence to its pet."""
         task.mark_complete()
-        nxt = task.next_occurrence()
+        nxt = task.next_occurrence(after=now or datetime.now())
         pet = self.owner.get_pet(task.pet_name)
         if nxt is not None and pet is not None:
             pet.add_task(nxt)
