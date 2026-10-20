@@ -91,7 +91,7 @@ tests/test_pawpal.py ...................                                 [100%]
 
 ## 📐 Smarter Scheduling
 
-All of the scheduling logic lives in `Scheduler` and `Task` in [pawpal_system.py](pawpal_system.py). Run `python main.py` to see each feature in the terminal.
+All of the scheduling logic lives in Scheduler and Task in [pawpal_system.py](pawpal_system.py). Run `python main.py` to see each feature in the terminal.
 
 | Feature | Method(s) | Notes |
 |---------|-----------|-------|
@@ -108,10 +108,9 @@ Conflicts are reported but never resolved. The scheduler does not move, reject, 
 
 Describe your app in numbered steps so a reader can follow along without watching a video:
 
-1. <!-- Describe this step -->
-2. <!-- Describe this step -->
-3. <!-- Describe this step -->
-4. <!-- Describe this step -->
-5. <!-- Add more steps as needed -->
+1. First you will run the app.py to open it in the browser. By running these commands in the terminal streamlit run app.py, type the owner's name, then add each pet with a name, age and breed. Duplicate or blank pet names are rejected.
+2. Adding task to the pet by pick a pet, then enter a description, date, time, duration and frequency (once, daily or weekly). Tasks can be added in any order.
+3. Reviwing the schedule. The Schedule section lists every task sorted by time. Use the Pet and Status dropdowns to filter, for example to see only Spot's pending tasks. If two pending tasks overlap, a conflict warning appears below the list.
+4. Mark the task on completion by Click Done on a task to complete it. Daily and weekly tasks automatically add the next occurrence to the same pet, so the schedule keeps itself up to date.
 
 **Screenshot or video** *(optional)*: <!-- Insert a screenshot or link to a demo video here -->

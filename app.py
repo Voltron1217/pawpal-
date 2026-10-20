@@ -82,9 +82,13 @@ if owner.pets:
         frequency = c3.selectbox("Frequency", ["once", "daily", "weekly"])
         duration = st.number_input("Duration (minutes)", min_value=5, max_value=480, value=30, step=5)
         if st.form_submit_button("Add task"):
-            owner.get_pet(target).add_task(
-                Task(description, datetime.combine(day, at), frequency, duration_minutes=int(duration))
-            )
+            new_task = Task(description, datetime.combine(day, at), frequency, duration_minutes=int(duration))
+            new_task.pet_name = target
+            clashes = scheduler.warnings_for(new_task)  # check before adding
+            owner.get_pet(target).add_task(new_task)
+            st.success(f"Added '{description}' for {target} at {new_task.time:%a %H:%M}.")
+            for message in clashes:
+                st.warning(message)
 else:
     st.caption("Add a pet first.")
 
@@ -100,21 +104,49 @@ tasks = scheduler.sorted_by_time(
         completed={"All": None, "Pending": False, "Completed": True}[status_filter],
     )
 )
-if not tasks:
-    st.info("No matching tasks.")
-for task in tasks:
-    cols = st.columns([5, 1])
-    mark = "✅" if task.completed else "⬜"
-    cols[0].write(
-        f"{mark} {task.time:%Y-%m-%d %H:%M} — **{task.pet_name}**: "
-        f"{task.description} ({task.frequency}, {task.duration_minutes} min)"
-    )
-    if not task.completed and cols[1].button("Done", key=f"done_{task.id}"):
-        scheduler.complete_task(task)
-        st.rerun()
 
-for a, b in scheduler.find_conflicts():
-    st.warning(
-        f"Conflict: {a.pet_name}'s {a.description} ({a.time:%H:%M}-{a.end:%H:%M}) "
-        f"overlaps {b.pet_name}'s {b.description} ({b.time:%H:%M}-{b.end:%H:%M})"
+warnings = scheduler.conflict_warnings()
+if warnings:
+    st.warning(f"{len(warnings)} scheduling conflict(s) found. Review them below the table.")
+elif scheduler.get_all_tasks():
+    st.success("No scheduling conflicts.")
+
+if tasks:
+    st.table(
+        [
+            {
+                "Status": "Done" if t.completed else "Pending",
+                "Date": f"{t.time:%Y-%m-%d}",
+                "Start": f"{t.time:%H:%M}",
+                "End": f"{t.end:%H:%M}",
+                "Pet": t.pet_name,
+                "Task": t.description,
+                "Repeats": t.frequency,
+            }
+            for t in tasks
+        ]
     )
+else:
+    st.info("No matching tasks.")
+
+for message in warnings:
+    st.warning(message)
+
+st.subheader("Mark task done")
+pending = scheduler.sorted_by_time(scheduler.filter_tasks(completed=False))
+if pending:
+    labels = {t.id: f"{t.time:%Y-%m-%d %H:%M} - {t.pet_name}: {t.description}" for t in pending}
+    chosen = st.selectbox("Pending task", list(labels), format_func=labels.get)
+    if st.button("Mark done"):
+        task = next(t for t in pending if t.id == chosen)
+        nxt = scheduler.complete_task(task)
+        if nxt:
+            st.session_state.flash = f"Done! Next '{task.description}' is scheduled for {nxt.time:%a %Y-%m-%d %H:%M}."
+        else:
+            st.session_state.flash = f"Done! '{task.description}' completed."
+        st.rerun()
+else:
+    st.caption("Nothing pending.")
+
+if "flash" in st.session_state:
+    st.success(st.session_state.pop("flash"))

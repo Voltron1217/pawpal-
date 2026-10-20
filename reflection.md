@@ -90,14 +90,17 @@ My design did change and gave me explanations as to why i should add this in the
 **a. Constraints and priorities**
 
 - What constraints does your scheduler consider (for example: time, priority, preferences)?
+My scheduler consist of time , Frequency on how much we need to take care of the dog and not overloading it too much on the User , and the dog.
+
 - How did you decide which constraints mattered most?
+Well from previous experience when i was taking care my dogs. That Timing is everything and i need to make sure i have enough time to walk my dogs out. Thats is where i know where to constraint the most. Without causing more problem ahead of time. Like not havign enough time with my dogs to walk along the park.
+
 
 **b. Tradeoffs**
 
 - Describe one tradeoff your scheduler makes.
 - Why is that tradeoff reasonable for this scenario?
-
-
+    Pet matching by name. because renaming a pet would break the link to the schedule that links to the task onto the pets. 
 
 ---
 
@@ -106,12 +109,17 @@ My design did change and gave me explanations as to why i should add this in the
 **a. How you used AI**
 
 - How did you use AI tools during this project (for example: design brainstorming, debugging, refactoring)?
+Majority is refacotring because it makes it easier for me to read the code and to make sure that other people can read the code as easy as possible. 
 - What kinds of prompts or questions were most helpful?
+1. Like how can you refactor this method into a more easier approach for a other people to understand whats going on. 
 
 **b. Judgment and verification**
 
 - Describe one moment where you did not accept an AI suggestion as-is.
 - How did you evaluate or verify what the AI suggested?
+
+I havent really found anything that AI suggested for me when working on this project that made me rejects its ideals. Everything that i coded and prompted where on the right track for me and reading through what it suggested for me was where i was going. 
+
 
 
 
@@ -128,6 +136,8 @@ My design did change and gave me explanations as to why i should add this in the
 
 - How confident are you that your scheduler works correctly?
 - What edge cases would you test next if you had more time?
+
+I feel very confident that my schedule is working correctly and one edge cases i would love to test is if they have failed their task. what would happen next. Like would it move to the schedule for another attend or something like that. 
 
 ---
 
