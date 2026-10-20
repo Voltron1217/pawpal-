@@ -45,10 +45,9 @@ class Task:
         if step is None:
             return None
         base = after if after is not None else self.time
-        nxt = max(
-            datetime.combine(base.date() + step, self.time.time()),
-            self.time + step,
-        )
+        nxt = self.time + step
+        while nxt.date() <= base.date():
+            nxt += step
         return replace(self, time=nxt, completed=False)
 
 
@@ -159,6 +158,8 @@ class Scheduler:
 
     def complete_task(self, task: Task, now: datetime | None = None) -> Task | None:
         """Mark a task done; if it recurs, add the next occurrence to its pet."""
+        if task.completed:
+            return None
         task.mark_complete()
         nxt = task.next_occurrence(after=now or datetime.now())
         pet = self.owner.get_pet(task.pet_name)

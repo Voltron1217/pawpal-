@@ -66,15 +66,28 @@ Today's Schedule
 # Run the full test suite:
 pytest
 
+python -m pytest
+
 # Run with coverage:
 pytest --cov
 ```
 
 Sample test output:
 
+I give it a 4 out of 5 stars of my confidents level. 
+
 ```
-# Paste your pytest output here
+platform darwin -- Python 3.12.7, pytest-7.4.4, pluggy-1.0.0
+rootdir: /Users/voltron1217/pawpal-
+plugins: anyio-4.2.0
+collected 19 items                                                             
+
+tests/test_pawpal.py ...................                                 [100%]
+
+============================== 19 passed in 0.02s ==============================
+
 ```
+
 
 ## 📐 Smarter Scheduling
 
@@ -82,12 +95,10 @@ All of the scheduling logic lives in `Scheduler` and `Task` in [pawpal_system.py
 
 | Feature | Method(s) | Notes |
 |---------|-----------|-------|
-| Task sorting | `Scheduler.sorted_by_time()` | Orders tasks from every pet by their `datetime` using `sorted(..., key=lambda t: t.time)`. Accepts an optional list, so it can sort filtered results. |
-| Daily view | `Scheduler.tasks_on(day)` | Tasks due on one calendar day, in time order. |
-| Filtering | `Scheduler.filter_tasks(pet_name, completed)` | Filter by pet name, completion status, or both. Passing `None` skips that filter. The Streamlit app exposes it as Pet and Status dropdowns. |
-| Recurring tasks | `Task.next_occurrence(after)`, `Scheduler.complete_task(task, now)` | Completing a `daily` or `weekly` task adds a fresh copy to the same pet. The new due date is the completion day plus one `timedelta` step, keeping the original time of day, and is never earlier than the old due time plus one step. `once` tasks do not recur. |
-| Conflict detection | `Scheduler.find_conflicts()` | Finds pending tasks whose time ranges overlap, using `Task.end` (start + `duration_minutes`, default 30). Works for the same pet or different pets, and ignores completed tasks. Back-to-back tasks are not conflicts. |
-| Conflict warnings | `Scheduler.conflict_warnings()`, `Scheduler.warnings_for(task)` | Lightweight: returns warning strings instead of raising, and an empty list means no conflicts. `conflict_warnings()` covers the whole schedule. `warnings_for()` checks a task before it is added. |
+| Task sorting | Scheduler.sorted_by_time() | Orders tasks from every pet by their datetime using sorted(..., key=lambda t: t.time).
+| Filtering | Scheduler.filter_tasks(pet_name, completed) | Filter by pet name, completion status, or both. Passing None skips that filter. The Streamlit app exposes it as Pet and Status dropdowns. |
+| Recurring tasks | Task.next_occurrence(after), Scheduler.complete_task(task, now) | Completing between daily or weekly task adds a fresh copy to the same pet. The new due date is the completion day plus one `timedelta` step, keeping the original time of day.
+| Conflict warnings | Scheduler.conflict_warnings(), Scheduler.warnings_for(task)` | Lightweight: returns warning strings instead of raising, and an empty list means no conflicts. conflict_warnings()covers the whole schedule. warnings_for() checks a task before it is added. |
 
 ### Tradeoff
 
