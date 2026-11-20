@@ -1,2 +1,6 @@
-streamlit>=1.30
+streamlit>=1.37
 pytest>=7.0
+
+# Optional: enables written answers in "Ask PawPal" (retrieval works without it)
+google-genai>=1.0
+anthropic>=0.40
